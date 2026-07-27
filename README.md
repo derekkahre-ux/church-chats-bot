@@ -103,3 +103,11 @@ Automated CI/CD Pipeline Architecture: Formulated a custom GitHub Actions workfl
 **Sub-directory Routing & Theme Asset Resolution:** Diagnosed and corrected absolute vs. relative routing path errors (404 asset failures) by mapping Vite's base directory parameter to align precisely with GitHub's sub-domain layout structure (/church-chat-bot/), ensuring smooth deployment of responsive layouts and dark-mode styles.
 
 **Secure Environment Secret Management:** Safely migrated the pipeline build process to an active production cloud database configuration on Supabase. Securely mapped private runtime tokens (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY) by injecting encrypted environment keys straight into GitHub Repository Secrets, ensuring Zero-Trust visibility for client API data.
+
+## ✨ Key Features & Improvements
+
+* **Conversational Q&A:** 30+ custom knowledge entries in `src/lib/knowledge.ts` covering service times, family programs, pastoral care, and sacraments.
+* **Database State & RLS Security:** Conversation logs persist across page refreshes via Supabase. Built with configured Row Level Security (RLS) policies using publishable environment keys to ensure safe client access while giving admins visibility into message logs via the Supabase dashboard.
+* **Accessibility (a11y) & Dark Mode:** Equipped with a light/dark mode switch. audited with the **WAVE Evaluation Tool** to ensure high-contrast compliance for text and UI elements in both color schemes.
+* **Quick Suggestions:** Dynamic clickable prompts for rapid navigation on mobile and desktop views.
+* **Live Demo Ready:** Streamlined layout tested for instant access via scanned QR codes at conferences and public meetups.

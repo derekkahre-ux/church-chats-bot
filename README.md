@@ -104,10 +104,8 @@ Automated CI/CD Pipeline Architecture: Formulated a custom GitHub Actions workfl
 
 **Secure Environment Secret Management:** Safely migrated the pipeline build process to an active production cloud database configuration on Supabase. Securely mapped private runtime tokens (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY) by injecting encrypted environment keys straight into GitHub Repository Secrets, ensuring Zero-Trust visibility for client API data.
 
-## ✨ Key Features & Improvements
+## ✨ Key Improvements
 
-* **Conversational Q&A:** 30+ custom knowledge entries in `src/lib/knowledge.ts` covering service times, family programs, pastoral care, and sacraments.
 * **Database State & RLS Security:** Conversation logs persist across page refreshes via Supabase. Built with configured Row Level Security (RLS) policies using publishable environment keys to ensure safe client access while giving admins visibility into message logs via the Supabase dashboard.
 * **Accessibility (a11y) & Dark Mode:** Equipped with a light/dark mode switch. audited with the **WAVE Evaluation Tool** to ensure high-contrast compliance for text and UI elements in both color schemes.
-* **Quick Suggestions:** Dynamic clickable prompts for rapid navigation on mobile and desktop views.
 * **Live Demo Ready:** Streamlined layout tested for instant access via scanned QR codes at conferences and public meetups.

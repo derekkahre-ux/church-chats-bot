@@ -268,7 +268,7 @@ function App() {
               className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-5 bg-stone-50/50 dark:bg-stone-900/50 transition-colors duration-300"
             >
               {loadingHistory && (
-                <div className="flex items-center justify-center gap-2 text-stone-400 dark:text-stone-500 text-sm py-8">
+                <div className="flex items-center justify-center gap-2 text-stone-600 dark:text-stone-300 text-sm py-8">
                   <RefreshCw className="w-4 h-4 animate-spin" strokeWidth={1.75} />
                   Loading conversation…
                 </div>
@@ -297,7 +297,7 @@ function App() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask about service times, location, prayer requests…"
-                    className="w-full rounded-full border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 px-5 py-3 pr-12 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+                    className="w-full rounded-full border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 px-5 py-3 pr-12 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-600 dark:placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
                     disabled={isTyping}
                     aria-label="Type your question"
                   />
@@ -311,9 +311,14 @@ function App() {
                   <Send className="w-5 h-5" strokeWidth={1.75} />
                 </button>
               </form>
-              <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-2 text-center">
+              <p className="text-xs text-stone-600 dark:text-stone-300 mt-2 text-center">
                 This assistant can help with common questions. For urgent pastoral care, call{' '}
-                <span className="font-medium text-stone-500 dark:text-stone-400">(319) 555-0142</span>.
+                <a 
+                  href="tel:3195550142" 
+                  className="font-semibold text-amber-700 dark:text-amber-400 underline underline-offset-2 hover:text-amber-800"
+                >
+                  (319) 555-0142
+                </a>.
               </p>
             </div>
           </section>
@@ -396,7 +401,7 @@ function App() {
 
       {/* Footer */}
       <footer className="border-t border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 transition-colors duration-300">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-stone-400 dark:text-stone-500">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 text-center text-xs text-stone-600 dark:text-stone-400">
           {CHURCH_INFO.name} &middot; {CHURCH_INFO.tagline}
         </div>
       </footer>
@@ -431,7 +436,7 @@ function MessageBubble({ message }: { message: DisplayMessage }) {
         >
           {message.content}
         </div>
-        <span className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 px-1">
+        <span className="text-xs text-stone-600 dark:text-stone-400 mt-1 px-1 font-normal tracking-wide">
           {formatTime(message.created_at)}
         </span>
       </div>

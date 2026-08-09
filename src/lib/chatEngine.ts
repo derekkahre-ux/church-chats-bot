@@ -1,4 +1,5 @@
-import { knowledgeBase, type KnowledgeEntry } from './knowledge';
+import { getCachedKnowledgeBase, loadKnowledgeBase } from './knowledgeLoader';
+import type { KnowledgeEntry } from './knowledge';
 
 const STOP_WORDS = new Set([
   'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
@@ -63,7 +64,22 @@ export interface ChatResponse {
   confidence: number;
 }
 
+/**
+ * Get bot response for a user message.
+ * Uses the lazy-loaded knowledge base (must be loaded via loadKnowledgeBase first).
+ */
 export function getBotResponse(userMessage: string): ChatResponse {
+  const knowledgeBase = getCachedKnowledgeBase();
+
+  if (!knowledgeBase) {
+    return {
+      answer:
+        "I'm starting up. Please try your question again in a moment!",
+      matchedEntry: null,
+      confidence: 0,
+    };
+  }
+
   const scored = knowledgeBase
     .map((entry) => ({ entry, score: scoreEntry(userMessage, entry) }))
     .filter((s) => s.score > 0)
@@ -72,7 +88,7 @@ export function getBotResponse(userMessage: string): ChatResponse {
   if (scored.length === 0) {
     return {
       answer:
-        "That's a great question! I'm not sure I have the right answer for that, but I'd love to help. You can reach our church office at (319) 555-0142 or hello@gracecommunity.org, and someone from our team will be happy to help. In the meantime, feel free to ask me about service times, our location, children's programs, prayer requests, or anything else about Grace Community Church.",
+        "That's a great question! I'm not sure I have the right answer for that, but I'd love to help. You can reach our church office at (319) 555-0142 or hello@gracecommunity.org, and someone from our team will be happy to assist!",
       matchedEntry: null,
       confidence: 0,
     };
@@ -100,3 +116,6 @@ export function getBotResponse(userMessage: string): ChatResponse {
     confidence,
   };
 }
+
+// Export the knowledge base loader for initialization
+export { loadKnowledgeBase };

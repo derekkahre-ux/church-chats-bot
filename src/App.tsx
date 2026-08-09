@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, Suspense } from 'react';
 import {
   Send,
   Church,
@@ -17,8 +17,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { supabase, type ChatMessage, type ChatRole } from './lib/supabase';
-import { getBotResponse } from './lib/chatEngine';
+import { getBotResponse, loadKnowledgeBase } from './lib/chatEngine';
 import { CHURCH_INFO, SUGGESTED_QUESTIONS } from './lib/knowledge';
+import { usePerformance } from './hooks/usePerformance';
 
 interface DisplayMessage {
   id: string;
@@ -35,6 +36,8 @@ const WELCOME_MESSAGE: DisplayMessage = {
     "Welcome to Grace Community Church! I'm here to answer your questions about our services, programs, and how we can support you. How can I help you today?",
   created_at: new Date().toISOString(),
 };
+
+const PAGE_SIZE = 10; // Paginate message history
 
 function formatTime(iso: string): string {
   try {
@@ -96,6 +99,8 @@ function ThemeToggle({ theme, onToggle }: { theme: Theme; onToggle: () => void }
 }
 
 function App() {
+  usePerformance('App initialization');
+
   const { theme, toggleTheme } = useTheme();
   const [messages, setMessages] = useState<DisplayMessage[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
@@ -104,6 +109,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const knowledgeBaseLoadedRef = useRef(false);
 
   const scrollToBottom = useCallback(() => {
     requestAnimationFrame(() => {
@@ -116,6 +122,17 @@ function App() {
     scrollToBottom();
   }, [messages, isTyping, scrollToBottom]);
 
+  // Initialize knowledge base on mount
+  useEffect(() => {
+    if (!knowledgeBaseLoadedRef.current) {
+      knowledgeBaseLoadedRef.current = true;
+      loadKnowledgeBase().catch((err) => {
+        console.error('Failed to load knowledge base:', err);
+      });
+    }
+  }, []);
+
+  // Load chat history from Supabase
   useEffect(() => {
     let cancelled = false;
 
@@ -124,20 +141,22 @@ function App() {
         const { data, error: queryError } = await supabase
           .from('Inquiries')
           .select('id, role, content, created_at')
-          .order('created_at', { ascending: true })
-          .limit(50);
+          .order('created_at', { ascending: false })
+          .limit(PAGE_SIZE);
 
         if (cancelled) return;
 
         if (queryError) throw queryError;
 
         if (data && data.length > 0) {
-          const history: DisplayMessage[] = (data as ChatMessage[]).map((m) => ({
-            id: m.id,
-            role: m.role,
-            content: m.content,
-            created_at: m.created_at,
-          }));
+          const history: DisplayMessage[] = (data as ChatMessage[])
+            .reverse()
+            .map((m) => ({
+              id: m.id,
+              role: m.role,
+              content: m.content,
+              created_at: m.created_at,
+            }));
           setMessages([WELCOME_MESSAGE, ...history]);
         }
       } catch (err) {
@@ -297,7 +316,7 @@ function App() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask about service times, location, prayer requests…"
-                    className="w-full rounded-full border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 px-5 py-3 pr-12 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-600 dark:placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition"
+                    className="w-full rounded-full border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 px-5 py-3 pr-12 text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
                     disabled={isTyping}
                     aria-label="Type your question"
                   />
@@ -305,7 +324,7 @@ function App() {
                 <button
                   type="submit"
                   disabled={!input.trim() || isTyping}
-                  className="shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-md hover:shadow-lg hover:from-amber-600 hover:to-amber-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+                  className="shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-md hover:shadow-lg hover:from-amber-600 hover:to-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   aria-label="Send message"
                 >
                   <Send className="w-5 h-5" strokeWidth={1.75} />
@@ -337,7 +356,7 @@ function App() {
                     key={q}
                     onClick={() => handleSuggestion(q)}
                     disabled={isTyping}
-                    className="text-left text-sm text-stone-600 dark:text-stone-300 px-3 py-2 rounded-lg bg-stone-50 dark:bg-stone-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-800 dark:hover:text-amber-300 ring-1 ring-stone-200/60 dark:ring-stone-700/60 hover:ring-amber-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-left text-sm text-stone-600 dark:text-stone-300 px-3 py-2 rounded-lg bg-stone-50 dark:bg-stone-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-700 dark:hover:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {q}
                   </button>
@@ -346,7 +365,7 @@ function App() {
             </div>
 
             {/* Church info card */}
-            <div className="bg-gradient-to-br from-stone-800 to-stone-900 dark:from-stone-900 dark:to-black text-stone-100 dark:text-stone-200 rounded-2xl shadow-md p-5 ring-1 ring-stone-800 dark:ring-stone-800/80 transition-colors duration-300">
+            <div className="bg-gradient-to-br from-stone-800 to-stone-900 dark:from-stone-900 dark:to-black text-stone-100 dark:text-stone-200 rounded-2xl shadow-md p-5 ring-1 ring-stone-800 dark:ring-stone-700 transition-colors duration-300">
               <h2 className="text-sm font-semibold text-amber-300 mb-4 flex items-center gap-2">
                 <Church className="w-4 h-4" strokeWidth={1.75} />
                 Visit us
